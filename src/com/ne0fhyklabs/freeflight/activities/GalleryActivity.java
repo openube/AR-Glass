@@ -225,7 +225,7 @@ public class GalleryActivity extends FragmentActivity implements
             return;
         }
 
-        VideoView videoView = null;
+        VideoView videoView;
 
         /*
          * There should be only one video view in view hierarchy in order for

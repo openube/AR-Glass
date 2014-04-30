@@ -185,12 +185,7 @@
         <item name="android:textColor">#FFFFFFFF</item>
     </style>
 
-    <style name="TextView" parent="@android:style/Widget.TextView">
-        <item name="android:textColor">@color/text_color</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-
-    <style name="SettingsTextView" parent="TextView">
+    <style name="SettingsTextView" parent="@android:style/Widget.TextView">
         <item name="android:textColor">@color/settings_text_color</item>
         <item name="android:gravity">right|center_vertical</item>
         <item name="android:ellipsize">end</item>

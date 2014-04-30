@@ -1,26 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linearLayout1"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="right|bottom"
-    android:paddingRight="20dp"
-    android:paddingBottom="10dp"
+    android:layout_height="match_parent"
     android:background="@drawable/ff2_flying_drone">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical|right"
-        android:textSize="30sp"
-        android:textColor="@android:color/darker_gray"
-        android:text="@string/LOADING"/>
+    <com.google.glass.widget.SliderView
+        android:id="@+id/connect_progress_slider"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:background="@drawable/glass_video_info_bg"
+        android:layout_alignParentBottom="true"/>
 
-    <ProgressBar
-        android:id="@+id/progressBar1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/hint_screen_progress_padding" />
-
-</LinearLayout>
+</RelativeLayout>

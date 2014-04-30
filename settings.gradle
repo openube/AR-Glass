@@ -1,2 +1,3 @@
-include ':AndroHud'
+include ':AndroHud', ':GlassProgressBar'
 project(':AndroHud').projectDir = new File('/home/fhuya/playground/android/projects/AndroHud')
+project(':GlassProgressBar').projectDir = new File('/home/fhuya/playground/android/projects/glass-progress-bar')

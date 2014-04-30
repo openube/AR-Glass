@@ -23,17 +23,20 @@ import android.view.View.OnKeyListener
 import android.widget.TextView
 import com.ne0fhyklabs.freeflight.utils.ARDroneMediaGallery
 import com.ne0fhyklabs.freeflight.utils.ShareUtils
-import android.content.Intent
 import android.widget.ImageView
 import android.view.LayoutInflater
 import com.ne0fhyklabs.freeflight.tasks.LoadMediaThumbTask
 import android.widget.ImageView.ScaleType
 import com.google.android.glass.media.Sounds
 import android.media.AudioManager
+import android.widget.VideoView
+import android.view.ViewStub
+import android.media.MediaPlayer
+import android.content.Intent
+import com.ne0fhyklabs.freeflight.activities.GlassVideoPlayerActivity.Static
 
 /**
- * Created by fhuya on 3/19/14.
- * TODO: Fix the default screen when there's no more pictures.
+ * Used to display the photos, and videos taken by the AR Drone on glass.
  */
 public class GlassGalleryActivity : FragmentActivity() {
 
@@ -49,7 +52,7 @@ public class GlassGalleryActivity : FragmentActivity() {
     private var mInitMediaTask: GetMediaObjectsListTask? = null
     private var mMediaFilter: MediaFilter? = null
 
-    private val mMediaGallery : ARDroneMediaGallery by Delegates.lazy {
+    private val mMediaGallery: ARDroneMediaGallery by Delegates.lazy {
         ARDroneMediaGallery(getApplicationContext())
     }
 
@@ -63,29 +66,15 @@ public class GlassGalleryActivity : FragmentActivity() {
         val cardsScroller = findViewById(R.id.glass_gallery) as CardScrollView
         cardsScroller.setAdapter(mAdapter)
         cardsScroller.setHorizontalScrollBarEnabled(true)
-        cardsScroller.setOnKeyListener(object: OnKeyListener {
-            override fun onKey(v: View?, keyCode: Int, event: KeyEvent): Boolean {
-                when(keyCode) {
-                    KeyEvent.KEYCODE_DPAD_CENTER -> {
-                        openOptionsMenu()
-                        return true
-                    }
-
-                    else -> return cardsScroller.onKeyDown(keyCode, event)
-                }
-            }
-        })
-
         cardsScroller.setOnItemClickListener { parent, view, position, id -> openOptionsMenu() }
-
         cardsScroller
     }
 
-    private var mDisablePauseSound = false
-
-    private val mNoMediaView : TextView by Delegates.lazy {
+    private val mNoMediaView: TextView by Delegates.lazy {
         findViewById(R.id.glass_gallery_no_media) as TextView
     }
+
+    private var mDisableExitSound = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,11 +103,13 @@ public class GlassGalleryActivity : FragmentActivity() {
 
     override fun onPause() {
         super.onPause()
-        if(!mDisablePauseSound) {
+        if(!mDisableExitSound) {
             val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             audio.playSoundEffect(Sounds.DISMISSED);
         }
-        mDisablePauseSound = false
+
+        //Restore the exit sound if it's been disabled
+        mDisableExitSound = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -136,7 +127,8 @@ public class GlassGalleryActivity : FragmentActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         //Get the currently viewed media item
-        val selectedMedia = mAdapter.getItem(mCardsScroller.getSelectedItemPosition()) as MediaVO
+        val selectedPosition = mCardsScroller.getSelectedItemPosition()
+        val selectedMedia = mAdapter.getItem(selectedPosition) as MediaVO
 
         when(item?.getItemId()) {
             R.id.menu_video_play -> {
@@ -159,35 +151,32 @@ public class GlassGalleryActivity : FragmentActivity() {
         }
     }
 
-    private fun playVideo(video: MediaVO){
-        if(!video.isVideo()){
+    private fun playVideo(video: MediaVO) {
+        if (!video.isVideo()) {
             Log.e(Static.TAG, "Error: trying to play image as video")
             return
         }
 
-        mDisablePauseSound = true
-        val videoIntent = Intent("com.google.glass.action.VIDEOPLAYER").putExtra("video_url",
-                video.getUri().toString())
-        startActivity(videoIntent)
+        mDisableExitSound = true
+        startActivity(Intent(this, javaClass<GlassVideoPlayerActivity>()).putExtra
+        (GlassVideoPlayerActivity.Static.EXTRA_VIDEO_URI, video.getUri().toString()))
     }
 
-    private fun shareMedia(media: MediaVO){
-        if(media.isVideo()){
+    private fun shareMedia(media: MediaVO) {
+        if (media.isVideo()) {
             ShareUtils.shareVideo(this, media.getPath())
-        }
-        else{
+        } else {
             ShareUtils.sharePhoto(this, media.getPath())
         }
     }
 
-    private fun deleteMedia(media: MediaVO){
+    private fun deleteMedia(media: MediaVO) {
         val mediaId = IntArray(1)
         mediaId.set(0, media.getId())
 
-        if(media.isVideo()){
+        if (media.isVideo()) {
             mMediaGallery.deleteVideos(mediaId)
-        }
-        else{
+        } else {
             mMediaGallery.deleteImages(mediaId)
         }
 
@@ -231,7 +220,6 @@ public class GlassGalleryActivity : FragmentActivity() {
             if (selectedElem != null)
                 mCardsScroller.setSelection(selectedElem)
 
-            mCardsScroller.updateViews(true)
             if (!mCardsScroller.isActivated())
                 mCardsScroller.activate()
         } else {
@@ -264,7 +252,7 @@ public class GlassGalleryActivity : FragmentActivity() {
             notifyDataSetChanged()
         }
 
-        fun remove(media: MediaVO){
+        fun remove(media: MediaVO) {
             mediaList.remove(media)
             notifyDataSetChanged()
         }
@@ -276,11 +264,11 @@ public class GlassGalleryActivity : FragmentActivity() {
         override fun getView(position: Int, view: View?, viewGroup: ViewGroup): View? {
             val mediaDetail = getItem(position) as MediaVO
 
-            val mediaCard = mInflater.inflate(R.layout.item_video, viewGroup, false)
+            val mediaCard = mInflater.inflate(R.layout.glass_gallery_item, viewGroup, false)
             val imageView = mediaCard?.findViewById(R.id.image) as ImageView
             val imageIndicatorView = mediaCard?.findViewById(R.id.btn_play)
 
-            if(!mediaDetail.isVideo()){
+            if (!mediaDetail.isVideo()) {
                 imageIndicatorView?.setVisibility(View.INVISIBLE)
                 imageView.setScaleType(ScaleType.CENTER_CROP)
             }
@@ -289,15 +277,13 @@ public class GlassGalleryActivity : FragmentActivity() {
             return mediaCard
         }
 
-        override fun findIdPosition(p0: Any?): Int = -1
-
-        override fun findItemPosition(item: Any?): Int {
+        override fun getPosition(item: Any?): Int {
             if (item !is MediaVO)
                 return -1
 
             val mediaVO = item as MediaVO
             for (i in 0..(getCount() - 1)) {
-                if (mediaVO?.equals(getItem(i)))
+                if (mediaVO.equals(getItem(i)))
                     return i
             }
 

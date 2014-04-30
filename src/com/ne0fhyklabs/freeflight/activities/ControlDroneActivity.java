@@ -34,6 +34,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.glass.media.Sounds;
+import com.google.android.glass.touchpad.Gesture;
+import com.google.android.glass.touchpad.GestureDetector;
 import com.ne0fhyklabs.freeflight.FreeFlightApplication;
 import com.ne0fhyklabs.freeflight.R;
 import com.ne0fhyklabs.freeflight.controllers.Controller;
@@ -68,10 +70,6 @@ import java.io.File;
 
 @SuppressLint("NewApi")
 /**
- * TODO: Map the record functionality to a menu or glass button
- * TODO: Map the take photo functionality to a menu or glass button
- * TODO: Map takeoff/land functionality to ...
- * TODO: perform drone calibration if absolute mode is enabled on drone takeoff.
  */
 public class ControlDroneActivity extends FragmentActivity implements
         WifiSignalStrengthReceiverDelegate, SettingsFragment.OnSettingsHandler,
@@ -268,8 +266,8 @@ public class ControlDroneActivity extends FragmentActivity implements
 
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        return mController != null && mController.onGenericMotion(findViewById(android.R.id
-                .content), event) || super.onGenericMotionEvent(event);
+        return (mController != null && mController.onGenericMotion(findViewById(android.R.id
+                .content), event)) || super.onGenericMotionEvent(event);
     }
 
     @Override

@@ -31,7 +31,7 @@ public class LoadMediaThumbTask
     protected Drawable doInBackground(Void... params)
     {
         Drawable drawable = null;
-        Bitmap bitmap = null;
+        Bitmap bitmap;
         ContentResolver contentResolver = imageView.getContext().getContentResolver();
         
         if (media.isVideo()) {

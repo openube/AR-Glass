@@ -1,6 +1,7 @@
 package com.ne0fhyklabs.freeflight.fragments;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
@@ -13,10 +14,22 @@ import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.google.android.glass.media.Sounds;
+import com.google.android.glass.touchpad.Gesture;
+import com.google.android.glass.touchpad.GestureDetector;
 import com.ne0fhyklabs.freeflight.FreeFlightApplication;
 import com.ne0fhyklabs.freeflight.R;
 import com.ne0fhyklabs.freeflight.controllers.Controller;
@@ -31,10 +44,12 @@ import com.ne0fhyklabs.freeflight.service.DroneControlService;
 import com.ne0fhyklabs.freeflight.settings.ApplicationSettings;
 import com.ne0fhyklabs.freeflight.ui.controls.SeekBarPreference;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * AR Glass preference fragment.
  */
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends GlassPreferenceFragment {
 
     /**
      * Used as tag for logging.
@@ -48,7 +63,6 @@ public class SettingsFragment extends PreferenceFragment {
         public DroneControlService getDroneControlService();
 
         public Controller getController();
-
     }
 
     private static final String NULL_MAC = "00:00:00:00:00:00";
@@ -199,6 +213,7 @@ public class SettingsFragment extends PreferenceFragment {
         super.onStart();
 
         final Context context = getActivity().getApplicationContext();
+
         mAppMac = ((WifiManager) context.getSystemService(Context.WIFI_SERVICE))
                 .getConnectionInfo().getMacAddress();
 
@@ -220,6 +235,7 @@ public class SettingsFragment extends PreferenceFragment {
     public void onStop(){
         super.onStop();
         final Context context = getActivity().getApplicationContext();
+
 		LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(context);
                 lbm.unregisterReceiver(mConfigChangedReceiver);
 				lbm.unregisterReceiver(mConnChangedReceiver);

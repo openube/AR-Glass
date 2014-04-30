@@ -2,7 +2,7 @@ import groovy.swing.SwingBuilder
 import com.android.builder.DefaultManifestParser
 
 buildscript {
-    ext.kotlin_version = '0.7.258'
+    ext.kotlin_version = '0.1-SNAPSHOT'
     repositories {
         mavenCentral()
         maven {
@@ -11,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.android.tools.build:gradle:0.9.+"
+        classpath 'com.android.tools.build:gradle:0.9.+'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -28,15 +28,16 @@ repositories {
 
 dependencies {
     compile 'com.android.support:support-v4:+'
-    compile fileTree(dir: 'libs', include: '*.jar')
+//    compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':AndroHud')
+    compile project(':GlassProgressBar')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion '19.0.1'
 
     sourceSets {
         main {
@@ -61,6 +62,7 @@ android {
         // by a similar customization.
         debug.setRoot('build-types/debug')
         release.setRoot('build-types/release')
+        main.java.srcDirs += 'src/main/kotlin'
     }
 
     signingConfigs {

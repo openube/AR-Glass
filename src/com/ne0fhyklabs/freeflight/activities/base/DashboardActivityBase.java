@@ -349,16 +349,11 @@ public abstract class DashboardActivityBase extends FragmentActivity implements 
             }
             card.setText(sDashboardScreenNames[i]);
 
-            return card.toView();
+            return card.getView();
         }
 
         @Override
-        public int findIdPosition(Object o) {
-            return -1;
-        }
-
-        @Override
-        public int findItemPosition(Object o) {
+        public int getPosition(Object o) {
             int defaultId = -1;
             if(!(o instanceof Integer))
                 return defaultId;

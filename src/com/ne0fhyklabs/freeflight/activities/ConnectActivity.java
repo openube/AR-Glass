@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.google.glass.widget.SliderView;
 import com.ne0fhyklabs.freeflight.R;
 import com.ne0fhyklabs.freeflight.receivers.DroneConnectionChangeReceiverDelegate;
 import com.ne0fhyklabs.freeflight.receivers.DroneConnectionChangedReceiver;
@@ -47,12 +49,10 @@ public class ConnectActivity extends FragmentActivity implements ServiceConnecti
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-//        Random random = new Random(System.currentTimeMillis());
-//        int tipNumber = random.nextInt(TIPS.length);
-//
-//        setContentView(TIPS[tipNumber]);
         setContentView(R.layout.tips_header);
+
+        final SliderView connectProgress = (SliderView) findViewById(R.id.connect_progress_slider);
+        connectProgress.startIndeterminate();
 
         droneReadyReceiver = new DroneReadyReceiver(this);
         droneConnectionChangeReceiver = new DroneConnectionChangedReceiver(this);
