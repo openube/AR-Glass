@@ -64,6 +64,7 @@ public class GoogleGlass extends Controller {
         @Override
         public void onSensorChanged(SensorEvent event) {
             if (mDroneControl == null || !mIsGlassMode || !isActive()) {
+                Log.d(TAG, "Inactive sensor!");
                 return;
             }
 
@@ -187,7 +188,6 @@ public class GoogleGlass extends Controller {
         mGestureDetector.setFingerListener(new GestureDetector.FingerListener() {
             @Override
             public void onFingerCountChanged(int previousCount, int currentCount) {
-                Log.i(TAG, "Current count: " + currentCount);
                 //Activate yaw control when two fingers
                 if (currentCount == YAW_CONTROL_TRIGGER){
                     mYawControlEnabled.set(true);

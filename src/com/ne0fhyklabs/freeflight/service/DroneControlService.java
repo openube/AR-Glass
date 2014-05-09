@@ -827,7 +827,7 @@ LocationListener
 
 	// This thread will poll navdata from the drone native lib
 	// and will notify listeners about state change such as land/take off or
-	// some alert has occured
+	// some alert has occurred
 	private Runnable navdataUpdateRunnable = new Runnable() {
 
 		@Override

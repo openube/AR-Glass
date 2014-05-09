@@ -218,17 +218,26 @@ public class ControlDroneActivity extends FragmentActivity implements
 
     public void setDroneRoll(float roll) {
         if (droneControlService != null) {
-            if (Math.abs(roll) <= MIN_TILT_ANGLE_THRESHOLD)
+            if (Math.abs(roll) <= MIN_TILT_ANGLE_THRESHOLD) {
                 roll = 0;
+            }
+
             droneControlService.setRoll(roll);
+        }
+        else{
+            Log.d(TAG, "Invalid drone control service.");
         }
     }
 
     public void setDronePitch(float pitch) {
         if (droneControlService != null) {
-            if (Math.abs(pitch) <= MIN_TILT_ANGLE_THRESHOLD)
+            if (Math.abs(pitch) <= MIN_TILT_ANGLE_THRESHOLD) {
                 pitch = 0;
+            }
             droneControlService.setPitch(pitch);
+        }
+        else{
+            Log.d(TAG, "Invalid drone control service.");
         }
     }
 
@@ -511,6 +520,7 @@ public class ControlDroneActivity extends FragmentActivity implements
      */
     protected void onDroneServiceConnected() {
         if (droneControlService != null) {
+            Log.d(TAG, "Connected to drone service. Resuming operation.");
             droneControlService.resume();
             droneControlService.requestDroneStatus();
 
