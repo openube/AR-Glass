@@ -16,10 +16,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.content.Context
 import kotlin.properties.Delegates
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View.OnKeyListener
 import android.widget.TextView
 import com.ne0fhyklabs.freeflight.utils.ARDroneMediaGallery
 import com.ne0fhyklabs.freeflight.utils.ShareUtils
@@ -29,11 +27,8 @@ import com.ne0fhyklabs.freeflight.tasks.LoadMediaThumbTask
 import android.widget.ImageView.ScaleType
 import com.google.android.glass.media.Sounds
 import android.media.AudioManager
-import android.widget.VideoView
-import android.view.ViewStub
-import android.media.MediaPlayer
 import android.content.Intent
-import com.ne0fhyklabs.freeflight.activities.GlassVideoPlayerActivity.Static
+import com.google.glass.widget.MessageDialog
 
 /**
  * Used to display the photos, and videos taken by the AR Drone on glass.
@@ -103,7 +98,7 @@ public class GlassGalleryActivity : FragmentActivity() {
 
     override fun onPause() {
         super.onPause()
-        if(!mDisableExitSound) {
+        if (!mDisableExitSound) {
             val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
             audio.playSoundEffect(Sounds.DISMISSED);
         }
@@ -143,7 +138,7 @@ public class GlassGalleryActivity : FragmentActivity() {
         }*/
 
             R.id.menu_media_delete -> {
-                deleteMedia(selectedMedia)
+                confirmDeleteMedia(selectedMedia)
                 return true
             }
 
@@ -170,7 +165,20 @@ public class GlassGalleryActivity : FragmentActivity() {
         }
     }
 
-    private fun deleteMedia(media: MediaVO) {
+    private fun confirmDeleteMedia(media: MediaVO) {
+        MessageDialog.Builder(this).setTemporaryIcon(R.drawable.ic_delete_50)
+        ?.setTemporaryMessage("Deleting")
+        ?.setIcon(R.drawable.ic_done_50)
+        ?.setMessage("Deleted")
+        ?.setDismissable(true)
+        ?.setAutoHide(true)
+        ?.setListener(object : MessageDialog.SimpleListener() {
+            override fun onDone() = deleteMedia(media)
+        })
+        ?.build()?.show()
+    }
+
+    private fun deleteMedia(media: MediaVO){
         val mediaId = IntArray(1)
         mediaId.set(0, media.getId())
 
