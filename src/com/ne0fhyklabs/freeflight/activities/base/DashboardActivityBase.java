@@ -174,14 +174,14 @@ public abstract class DashboardActivityBase extends FragmentActivity implements 
                     case R.string.PHOTOS:
                         startActivity(new Intent(DashboardActivityBase.this,
                                 GlassGalleryActivity.class).putExtra
-                                (GlassGalleryActivity.IntentExtras.instance$.getMEDIA_FILTER(),
+                                (GlassGalleryActivity.MEDIA_FILTER,
                                         GetMediaObjectsListTask.MediaFilter.IMAGES.ordinal()));
                         break;
 
                     case R.string.VIDEOS:
                         startActivity(new Intent(DashboardActivityBase.this,
                                 GlassGalleryActivity.class).putExtra
-                                (GlassGalleryActivity.IntentExtras.instance$.getMEDIA_FILTER(),
+                                (GlassGalleryActivity.MEDIA_FILTER,
                                         GetMediaObjectsListTask.MediaFilter.VIDEOS.ordinal()));
                         break;
                 }

@@ -28,32 +28,32 @@ import org.jetbrains.annotations.Nullable;
 public class GlassPreferenceFragment extends PreferenceFragment {
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
 
         final Activity parentActivity = getActivity();
-        if(parentActivity != null){
+        if (parentActivity != null) {
             updateWindowCallback(parentActivity.getWindow());
         }
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         super.onStop();
 
         final Activity parentActivity = getActivity();
-        if(parentActivity != null){
+        if (parentActivity != null) {
             restoreWindowCallback(parentActivity.getWindow());
         }
     }
 
     @Override
-    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference){
-        if(preference instanceof PreferenceScreen){
+    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
+        if (preference instanceof PreferenceScreen) {
             //Update the preference dialog window callback. The new callback is able to detect
             // and handle the glass touchpad gestures.
             final Dialog prefDialog = ((PreferenceScreen) preference).getDialog();
-            if(prefDialog != null) {
+            if (prefDialog != null) {
                 updateWindowCallback(prefDialog.getWindow());
             }
         }
@@ -63,16 +63,35 @@ public class GlassPreferenceFragment extends PreferenceFragment {
 
     /**
      * Replace the current window callback with one supporting glass gesture events.
+     *
      * @param window
      */
-    private void updateWindowCallback(Window window){
-        if(window == null) {
+    public static void updateWindowCallback(Window window) {
+        if (window == null) {
             return;
         }
 
         final Window.Callback originalCb = window.getCallback();
-        if(!(originalCb instanceof GlassCallback)) {
+        if (!(originalCb instanceof GlassCallback)) {
             final GlassCallback glassCb = new GlassCallback(window.getContext(), originalCb);
+            window.setCallback(glassCb);
+        }
+    }
+
+    /**
+     * Replace the current window callback with one supporting glass gesture events.
+     * @param window
+     * @param glassDetector GestureDetector to which the generic motion events should be directed.
+     */
+    public static void updateWindowCallback(Window window, GestureDetector glassDetector) {
+        if (window == null) {
+            return;
+        }
+
+        final Window.Callback originalCb = window.getCallback();
+        if(!(originalCb instanceof GlassCallback)){
+            final GlassCallback glassCb = new GlassCallback(window.getContext(), originalCb,
+                    glassDetector);
             window.setCallback(glassCb);
         }
     }
@@ -80,16 +99,17 @@ public class GlassPreferenceFragment extends PreferenceFragment {
     /**
      * Restore the original window callback for this window, if it was updated with a glass
      * window callback.
+     *
      * @param window
      */
-    private void restoreWindowCallback(Window window){
-        if(window == null){
+    public static void restoreWindowCallback(Window window) {
+        if (window == null) {
             return;
         }
 
         final Window.Callback currentCb = window.getCallback();
-        if(currentCb instanceof GlassCallback){
-            final Window.Callback originalCb = ((GlassCallback)currentCb).getOriginalCallback();
+        if (currentCb instanceof GlassCallback) {
+            final Window.Callback originalCb = ((GlassCallback) currentCb).getOriginalCallback();
             window.setCallback(originalCb);
         }
     }
@@ -109,14 +129,14 @@ public class GlassPreferenceFragment extends PreferenceFragment {
          */
         private final Window.Callback mOriginalCb;
 
-        public GlassCallback(Context context, Window.Callback original){
+        public GlassCallback(Context context, Window.Callback original) {
             mOriginalCb = original;
 
             mGlassDetector = new GestureDetector(context);
             mGlassDetector.setBaseListener(new GestureDetector.BaseListener() {
                 @Override
                 public boolean onGesture(Gesture gesture) {
-                    switch(gesture){
+                    switch (gesture) {
                         case TAP:
                             dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,
                                     KeyEvent.KEYCODE_DPAD_CENTER));
@@ -144,10 +164,16 @@ public class GlassPreferenceFragment extends PreferenceFragment {
             });
         }
 
+        public GlassCallback(Context context, Window.Callback original,
+                             GestureDetector glassDetector) {
+            mOriginalCb = original;
+            mGlassDetector = glassDetector;
+        }
+
         /**
          * @return the Window.Callback instance this one replaced.
          */
-        public Window.Callback getOriginalCallback(){
+        public Window.Callback getOriginalCallback() {
             return mOriginalCb;
         }
 
@@ -173,8 +199,8 @@ public class GlassPreferenceFragment extends PreferenceFragment {
 
         @Override
         public boolean dispatchGenericMotionEvent(MotionEvent event) {
-            return mGlassDetector.onMotionEvent(event) || mOriginalCb.dispatchGenericMotionEvent
-                    (event);
+            return (mGlassDetector != null && mGlassDetector.onMotionEvent(event)) || mOriginalCb
+                    .dispatchGenericMotionEvent(event);
         }
 
         @Override

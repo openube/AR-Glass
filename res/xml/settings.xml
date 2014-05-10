@@ -34,50 +34,50 @@
         </PreferenceScreen>
         <PreferenceScreen android:title="@string/FLIGHT_SETTINGS">
 
-            <com.ne0fhyklabs.freeflight.ui.controls.SeekBarPreference
+            <com.ne0fhyklabs.freeflight.ui.controls.GlassSliderPreference
                 android:key="@string/key_alt_limit"
                 android:title="@string/altitude_limit"
                 android:summary="Restrict the maximum altitude of the AR Drone"
                 android:max="100"
                 android:defaultValue="3"
                 robobunny:min="3"
-                robobunny:unitsRight="m"
+                robobunny:unit="m"
                 android:persistent="false"
                 android:dependency="@string/key_network_name"
                 />
 
-            <com.ne0fhyklabs.freeflight.ui.controls.SeekBarPreference
+            <com.ne0fhyklabs.freeflight.ui.controls.GlassSliderPreference
                 android:key="@string/key_vert_speed"
                 android:title="@string/vertical_speed_max"
                 android:summary="Vertical climb and descend speed of the AR Drone"
                 android:max="2000"
                 android:defaultValue="200"
                 robobunny:min="200"
-                robobunny:unitsRight="mm/s"
+                robobunny:unit="mm/s"
                 android:persistent="false"
                 android:dependency="@string/key_network_name"
                 />
 
-            <com.ne0fhyklabs.freeflight.ui.controls.SeekBarPreference
+            <com.ne0fhyklabs.freeflight.ui.controls.GlassSliderPreference
                 android:key="@string/key_yaw_speed"
                 android:title="@string/yaw_speed_max"
                 android:summary="Speed of rotation of the AR Drone"
                 android:max="350"
                 android:defaultValue="40"
                 robobunny:min="40"
-                robobunny:unitsRight="°/s"
+                robobunny:unit="°/s"
                 android:persistent="false"
                 android:dependency="@string/key_network_name"
                 />
 
-            <com.ne0fhyklabs.freeflight.ui.controls.SeekBarPreference
+            <com.ne0fhyklabs.freeflight.ui.controls.GlassSliderPreference
                 android:key="@string/key_drone_tilt"
                 android:title="@string/tilt_angle_max"
                 android:summary="AR Drone tilt angle limit"
                 android:max="30"
                 android:defaultValue="5"
                 robobunny:min="5"
-                robobunny:unitsRight="°"
+                robobunny:unit="°"
                 android:persistent="false"
                 android:dependency="@string/key_network_name"
                 />
@@ -104,7 +104,7 @@
         </PreferenceScreen>
 
         <PreferenceScreen android:title="@string/PILOTING_MODE">
-            <com.ne0fhyklabs.freeflight.ui.controls.SeekBarPreference
+            <com.ne0fhyklabs.freeflight.ui.controls.GlassSliderPreference
                 android:key="@string/key_device_tilt"
                 android:title="@string/tilt_max"
                 android:summary="Glass tilt angle limit"
@@ -113,7 +113,7 @@
                 android:dependency="@string/key_network_name"
                 android:persistent="false"
                 robobunny:min="5"
-                robobunny:unitsRight="°"/>
+                robobunny:unit="°"/>
 
         </PreferenceScreen>
 

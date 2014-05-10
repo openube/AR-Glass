@@ -35,11 +35,8 @@ import com.google.glass.widget.MessageDialog
  */
 public class GlassGalleryActivity : FragmentActivity() {
 
-    object Static {
+    class object {
         val TAG = javaClass<GlassGalleryActivity>().getName()
-    }
-
-    object IntentExtras {
         val SELECTED_ELEMENT = "SELECTED_ELEMENT"
         val MEDIA_FILTER = "MEDIA_FILTER"
     }
@@ -78,10 +75,10 @@ public class GlassGalleryActivity : FragmentActivity() {
 
         val intent = getIntent()
         val selectedItem = if (savedInstanceState != null)
-            savedInstanceState.getInt(IntentExtras.SELECTED_ELEMENT, 0)
-        else intent?.getIntExtra(IntentExtras.SELECTED_ELEMENT, 0) ?: 0
+            savedInstanceState.getInt(SELECTED_ELEMENT, 0)
+        else intent?.getIntExtra(SELECTED_ELEMENT, 0) ?: 0
 
-        val mediaFilterType = intent?.getIntExtra(IntentExtras.MEDIA_FILTER,
+        val mediaFilterType = intent?.getIntExtra(MEDIA_FILTER,
                 MediaFilter.IMAGES.ordinal()) as Int
         mMediaFilter = MediaFilter.values()[mediaFilterType]
 
@@ -148,13 +145,13 @@ public class GlassGalleryActivity : FragmentActivity() {
 
     private fun playVideo(video: MediaVO) {
         if (!video.isVideo()) {
-            Log.e(Static.TAG, "Error: trying to play image as video")
+            Log.e(TAG, "Error: trying to play image as video")
             return
         }
 
         mDisableExitSound = true
         startActivity(Intent(this, javaClass<GlassVideoPlayerActivity>()).putExtra
-        (GlassVideoPlayerActivity.Static.EXTRA_VIDEO_URI, video.getUri().toString()))
+        (GlassVideoPlayerActivity.EXTRA_VIDEO_URI, video.getUri().toString()))
     }
 
     private fun shareMedia(media: MediaVO) {
@@ -201,9 +198,9 @@ public class GlassGalleryActivity : FragmentActivity() {
             try {
                 mInitMediaTask!!.execute().get()
             } catch(e: InterruptedException) {
-                Log.e(Static.TAG, e.getMessage(), e)
+                Log.e(TAG, e.getMessage(), e)
             } catch(e: ExecutionException) {
-                Log.e(Static.TAG, e.getMessage(), e)
+                Log.e(TAG, e.getMessage(), e)
             }
         }
     }
@@ -242,7 +239,7 @@ public class GlassGalleryActivity : FragmentActivity() {
         super.onSaveInstanceState(outState)
 
         val cardsScroller = findViewById(R.id.glass_gallery) as CardScrollView
-        outState.putInt(IntentExtras.SELECTED_ELEMENT, cardsScroller.getSelectedItemPosition())
+        outState.putInt(SELECTED_ELEMENT, cardsScroller.getSelectedItemPosition())
     }
 
     private class GlassGalleryAdapter(private val mediaList: ArrayList<MediaVO>,

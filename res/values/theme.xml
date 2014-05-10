@@ -6,13 +6,9 @@
 
     <style name="FreeFlightTheme" parent="FreeFlightBase">
         <item name="android:windowBackground">@color/window_background</item>
-        <item name="android:checkboxStyle">@style/SettingsCheckBox</item>
-        <item name="android:buttonStyle">@style/SettingsButton</item>
-        <item name="android:editTextStyle">@style/SettingsEditText</item>
-        <item name="viewPagerIndicatorStyle">@style/ViewPagerIndicatorStyle</item>
     </style>
     
-    <style name="FreeFlightTheme.HudScreen" parent="@android:Theme.Holo.NoActionBar.Fullscreen"/>
+    <style name="FreeFlightTheme.HudScreen" parent="FreeFlightTheme"/>
 
     <style name="FreeFlightTheme.SettingsScreen" parent="FreeFlightTheme">
         <item name="android:windowBackground">@color/transparent</item>

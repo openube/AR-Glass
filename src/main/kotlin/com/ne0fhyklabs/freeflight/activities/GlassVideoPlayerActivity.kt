@@ -27,7 +27,7 @@ import android.os.Handler
  */
 public class GlassVideoPlayerActivity : FragmentActivity() {
 
-    object Static {
+    class object  {
         val TAG = javaClass<GlassVideoPlayerActivity>().getSimpleName()
         val PACKAGE_NAME = javaClass<GlassVideoPlayerActivity>().getPackage()?.getName()
         val EXTRA_VIDEO_URI = "$PACKAGE_NAME.EXTRA_VIDEO_URI"
@@ -43,7 +43,7 @@ public class GlassVideoPlayerActivity : FragmentActivity() {
         val videoView = findViewById(R.id.glass_video_player) as VideoView
         videoView.setOnCompletionListener { finish() }
         videoView.setOnErrorListener { mp, what, extra ->
-            Log.e(Static.TAG, "Unable to play video (error type: $what, error code: $extra)")
+            Log.e(TAG, "Unable to play video (error type: $what, error code: $extra)")
             finish()
             true
         }
@@ -117,7 +117,7 @@ public class GlassVideoPlayerActivity : FragmentActivity() {
 
     private val mInfoVisibilityUpdater: Runnable = object : Runnable {
         override fun run() {
-            mVideoInfoContainer.animate()?.alpha(0f)?.setDuration(Static.INFO_FADEOUT_DURATION)
+            mVideoInfoContainer.animate()?.alpha(0f)?.setDuration(INFO_FADEOUT_DURATION)
         }
     }
 
@@ -162,9 +162,9 @@ public class GlassVideoPlayerActivity : FragmentActivity() {
 
     private fun handleIntent(intent: Intent) {
         //Retrieve the video uri
-        val videoUri = intent.getStringExtra(Static.EXTRA_VIDEO_URI)
+        val videoUri = intent.getStringExtra(EXTRA_VIDEO_URI)
         if (videoUri == null) {
-            Log.e(Static.TAG, "Intent is missing video uri argument.")
+            Log.e(TAG, "Intent is missing video uri argument.")
             Toast.makeText(getApplicationContext()!!, "Invalid video!", Toast.LENGTH_SHORT).show()
             finish()
         } else {
@@ -198,7 +198,7 @@ public class GlassVideoPlayerActivity : FragmentActivity() {
         mCallbacksRunner.removeCallbacks(mInfoVisibilityUpdater)
 
         mVideoInfoContainer.setAlpha(1f)
-        mCallbacksRunner.postDelayed(mInfoVisibilityUpdater, Static.INFO_VISIBILITY_DURATION)
+        mCallbacksRunner.postDelayed(mInfoVisibilityUpdater, INFO_VISIBILITY_DURATION)
     }
 
     private fun enableInfoUpdate(enable: Boolean) {
