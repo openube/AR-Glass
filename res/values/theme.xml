@@ -8,7 +8,9 @@
         <item name="android:windowBackground">@color/window_background</item>
     </style>
     
-    <style name="FreeFlightTheme.HudScreen" parent="FreeFlightTheme"/>
+    <style name="FreeFlightTheme.HudScreen" parent="FreeFlightTheme">
+        <item name="android:textViewStyle">@android:style/TextAppearance.Holo.Widget.TextView</item>
+    </style>
 
     <style name="FreeFlightTheme.SettingsScreen" parent="FreeFlightTheme">
         <item name="android:windowBackground">@color/transparent</item>

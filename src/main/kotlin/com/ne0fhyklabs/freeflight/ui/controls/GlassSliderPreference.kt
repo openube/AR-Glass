@@ -73,6 +73,12 @@ class GlassSliderPreference(val context: Context, attrs: AttributeSet)
         }
     }
 
+    fun persistIntAndNotify(value: Int): Boolean {
+        val retvalue = super.persistInt(value)
+        callChangeListener(value)
+        return retvalue
+    }
+
     fun launchSliderDialog(fm: FragmentManager){
         val sliderDialog = GlassSliderDialog()
         sliderDialog.show(fm, "Slider Preference dialog")
@@ -97,7 +103,7 @@ class GlassSliderPreference(val context: Context, attrs: AttributeSet)
 
                         //Save the current value
                         if(mCurrentValue != mStartValue){
-                            persistInt(mCurrentValue)
+                            persistIntAndNotify(mCurrentValue)
                         }
 
                         //Close the preference dialog
