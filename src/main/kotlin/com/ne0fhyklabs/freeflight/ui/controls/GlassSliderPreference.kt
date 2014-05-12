@@ -117,7 +117,9 @@ class GlassSliderPreference(val context: Context, attrs: AttributeSet)
 
             gestureDetector.setScrollListener { displacement, delta, velocity ->
                 if (mSliderBar != null) {
-                    val update = (delta / 10).toFloat()
+                    val range =  mMaxValue - mMinValue
+                    val update = (delta * (range / 600f)).toFloat()
+
                     mCurrentValue += update.toInt()
                     if (mCurrentValue > mMaxValue) {
                         mCurrentValue = mMaxValue
