@@ -31,11 +31,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 import com.google.android.glass.media.Sounds;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+import com.google.android.glass.view.WindowUtils;
 import com.ne0fhyklabs.freeflight.FreeFlightApplication;
 import com.ne0fhyklabs.freeflight.R;
 import com.ne0fhyklabs.freeflight.controllers.Controller;
@@ -133,7 +135,10 @@ public class ControlDroneActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        final Window window = getWindow();
+        window.requestFeature(WindowUtils.FEATURE_VOICE_COMMANDS);
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         setContentView(R.layout.activity_control_drone_screen);
         mDroneView = (HudViewController) findViewById(R.id.drone_view);
@@ -379,13 +384,13 @@ public class ControlDroneActivity extends FragmentActivity implements
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_control_drone, menu);
-        return true;
+    public boolean onCreatePanelMenu(int featureId, Menu menu){
+            getMenuInflater().inflate(R.menu.menu_control_drone, menu);
+            return true;
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu){
+    public boolean onPreparePanel(int featureId, View view, Menu menu){
         MenuItem takeoff = menu.findItem(R.id.menu_drone_takeoff);
         if(takeoff != null){
             takeoff.setTitle(flying? R.string.LAND: R.string.TAKE_OFF);
@@ -394,7 +399,7 @@ public class ControlDroneActivity extends FragmentActivity implements
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
+    public boolean onMenuItemSelected(int featureId, MenuItem item){
         switch(item.getItemId()){
             case R.id.menu_drone_takeoff:
                 triggerDroneTakeOff();

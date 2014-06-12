@@ -1,5 +1,5 @@
 import groovy.swing.SwingBuilder
-import com.android.builder.DefaultManifestParser
+import com.android.builder.core.DefaultManifestParser
 
 buildscript {
     ext.kotlin_version = '0.1-SNAPSHOT'
@@ -11,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.+'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -37,7 +37,7 @@ dependencies {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.0.3'
+    buildToolsVersion '19.1.0'
 
     sourceSets {
         main {
@@ -75,11 +75,11 @@ android {
     }
 
     productFlavors {
-        arm {
-            ndk {
-                abiFilters "armeabi-v7a", "armeabi"
-            }
-        }
+//        arm {
+//            ndk {
+//                abiFilters "armeabi-v7a", "armeabi"
+//            }
+//        }
     }
 
     buildTypes {
