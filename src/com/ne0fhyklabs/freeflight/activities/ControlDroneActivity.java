@@ -27,16 +27,14 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
 import com.google.android.glass.media.Sounds;
-import com.google.android.glass.touchpad.Gesture;
-import com.google.android.glass.touchpad.GestureDetector;
 import com.google.android.glass.view.WindowUtils;
 import com.ne0fhyklabs.freeflight.FreeFlightApplication;
 import com.ne0fhyklabs.freeflight.R;
@@ -59,16 +57,16 @@ import com.ne0fhyklabs.freeflight.receivers.DroneVideoRecordStateReceiverDelegat
 import com.ne0fhyklabs.freeflight.receivers.DroneVideoRecordingStateReceiver;
 import com.ne0fhyklabs.freeflight.receivers.WifiSignalStrengthChangedReceiver;
 import com.ne0fhyklabs.freeflight.receivers.WifiSignalStrengthReceiverDelegate;
-import com.ne0fhyklabs.freeflight.sensors.DeviceOrientationManager;
 import com.ne0fhyklabs.freeflight.service.DroneControlService;
 import com.ne0fhyklabs.freeflight.settings.ApplicationSettings;
-import com.ne0fhyklabs.freeflight.settings.ApplicationSettings.ControlMode;
 import com.ne0fhyklabs.freeflight.transcodeservice.TranscodingService;
 import com.ne0fhyklabs.freeflight.ui.HudViewController;
 import com.ne0fhyklabs.freeflight.ui.HudViewProxy;
 import com.ne0fhyklabs.freeflight.utils.GlassUtils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 @SuppressLint("NewApi")
 /**
@@ -84,6 +82,15 @@ public class ControlDroneActivity extends FragmentActivity implements
     private static final float MIN_TILT_ANGLE_THRESHOLD = (1f / 6f);
 
     private static final String TAG = ControlDroneActivity.class.getName();
+
+    public interface OnDroneStateListener {
+        public void onFlyingStateUpdate(boolean isFlying);
+
+        public void onRecordingStateUpdate(boolean isRecording);
+    }
+
+    private final List<OnDroneStateListener> mDroneStateListeners = new
+            ArrayList<OnDroneStateListener>();
 
     private DroneControlService droneControlService;
     private ApplicationSettings settings;
@@ -164,6 +171,18 @@ public class ControlDroneActivity extends FragmentActivity implements
          */
         mController = Controller.ControllerType.GOOGLE_GLASS.getImpl(this);
         settings.setFirstLaunch(false);
+    }
+
+    public void addDroneStateListener(OnDroneStateListener listener){
+        if(listener != null){
+            mDroneStateListeners.add(listener);
+        }
+    }
+
+    public void removeDroneStateListener(OnDroneStateListener listener){
+        if(listener != null){
+            mDroneStateListeners.remove(listener);
+        }
     }
 
     private void initController() {
@@ -274,8 +293,9 @@ public class ControlDroneActivity extends FragmentActivity implements
     }
 
     public void triggerDroneTakeOff() {
-        if (droneControlService != null)
+        if (droneControlService != null) {
             droneControlService.triggerTakeOff();
+        }
     }
 
     @Override
@@ -309,8 +329,14 @@ public class ControlDroneActivity extends FragmentActivity implements
     }
 
     public void doLeftFlip() {
-        if (droneControlService != null)
+        if(!flying){
+            Toast.makeText(getApplicationContext(), "Flip can only be done while flying!",
+                    Toast.LENGTH_LONG).show();
+        }
+
+        if (droneControlService != null) {
             droneControlService.doLeftFlip();
+        }
     }
 
     @Override
@@ -384,22 +410,33 @@ public class ControlDroneActivity extends FragmentActivity implements
     }
 
     @Override
-    public boolean onCreatePanelMenu(int featureId, Menu menu){
-            getMenuInflater().inflate(R.menu.menu_control_drone, menu);
-            return true;
+    public boolean onCreatePanelMenu(int featureId, Menu menu) {
+        final MenuInflater menuInflater = getMenuInflater();
+        if(mController == null || !mController.onCreatePanelMenu(menuInflater, featureId, menu)){
+            menuInflater.inflate(R.menu.menu_control_drone_default, menu);
+        }
+
+        return true;
     }
 
     @Override
     public boolean onPreparePanel(int featureId, View view, Menu menu){
-        MenuItem takeoff = menu.findItem(R.id.menu_drone_takeoff);
-        if(takeoff != null){
-            takeoff.setTitle(flying? R.string.LAND: R.string.TAKE_OFF);
+        if(mController == null || !mController.onPreparePanel(featureId, view, menu)){
+            final MenuItem takeoff = menu.findItem(R.id.menu_drone_takeoff);
+            if (takeoff != null) {
+                takeoff.setTitle(flying ? R.string.LAND : R.string.TAKE_OFF);
+            }
         }
+
         return true;
     }
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item){
+        if(mController != null && mController.onMenuItemSelected(featureId, item)) {
+            return true;
+        }
+
         switch(item.getItemId()){
             case R.id.menu_drone_takeoff:
                 triggerDroneTakeOff();
@@ -422,7 +459,7 @@ public class ControlDroneActivity extends FragmentActivity implements
         }
     }
 
-    private void showSettingsFragment(){
+    public void showSettingsFragment(){
         final View settingsView = findViewById(R.id.control_settings_container);
         settingsView.setVisibility(View.VISIBLE);
 
@@ -462,15 +499,15 @@ public class ControlDroneActivity extends FragmentActivity implements
 
     @Override
     public boolean onMenuOpened(int featureId, Menu menu){
-        if(mController != null)
-        mController.pause();
+        if(featureId != WindowUtils.FEATURE_VOICE_COMMANDS){
+            pauseController();
+        }
         return true;
     }
 
     @Override
     public void onOptionsMenuClosed(Menu menu){
-        if(mController != null)
-        mController.resume();
+        resumeController();
     }
 
     @Override
@@ -549,6 +586,10 @@ public class ControlDroneActivity extends FragmentActivity implements
     @Override
     public void onDroneFlyingStateChanged(boolean flying) {
         this.flying = flying;
+        for(OnDroneStateListener listener: mDroneStateListeners){
+            listener.onFlyingStateUpdate(flying);
+        }
+
         if (mHudProxy != null)
             mHudProxy.setIsFlying(flying);
 
@@ -615,6 +656,9 @@ public class ControlDroneActivity extends FragmentActivity implements
 
         boolean prevRecording = this.recording;
         this.recording = recording;
+        for(OnDroneStateListener listener: mDroneStateListeners){
+            listener.onRecordingStateUpdate(recording);
+        }
 
         mHudProxy.setRecording(recording);
         mHudProxy.setUsbIndicatorEnabled(usbActive);

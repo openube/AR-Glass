@@ -1,6 +1,9 @@
 package com.ne0fhyklabs.freeflight.controllers;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -10,11 +13,16 @@ import android.media.SoundPool;
 import android.os.Build;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.google.android.glass.content.Intents;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+import com.google.android.glass.view.WindowUtils;
 import com.ne0fhyklabs.freeflight.R;
 import com.ne0fhyklabs.freeflight.activities.ControlDroneActivity;
 import com.ne0fhyklabs.freeflight.drone.DroneConfig.EDroneVersion;
@@ -28,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * EnhancedGestureDetector detects double tap gesture of second pointer when using multi touch in
  * addition to standard GestureDetector gestures.
  */
-public class GoogleGlass extends Controller {
+public class GoogleGlass extends Controller implements ControlDroneActivity.OnDroneStateListener {
     private static final String TAG = GoogleGlass.class.getSimpleName();
 
     /*
@@ -40,6 +48,23 @@ public class GoogleGlass extends Controller {
 
     private static final int YAW_CONTROL_TRIGGER = 2;
     private static final float RAD_TO_DEG = (float) (180f / Math.PI);
+
+    private final BroadcastReceiver mOnHeadStateListener = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if(Intents.ACTION_ON_HEAD_STATE_CHANGED.equals(action)){
+                final boolean isOnHead = intent.getBooleanExtra(Intents.EXTRA_IS_ON_HEAD, false);
+                if(!isOnHead){
+                    //Land the AR Drone.
+                    if(mDroneControl.isDroneFlying()) {
+                        mDroneControl.triggerDroneTakeOff();
+                        mDroneControl.finish();
+                    }
+                }
+            }
+        }
+    };
 
     private boolean magnetoEnabled;
     private boolean mIsGlassMode;
@@ -57,6 +82,15 @@ public class GoogleGlass extends Controller {
 
     private int mDeviceTiltMax;
     private int mDroneYawSpeed;
+
+    /**
+     * We keep a reference to the menu items for the glass voice menu.
+     * This is so we can update the title of the menu item based on the drone state.
+     * This would usually be done in 'onPreparePanel', but for the glass voice menu,
+     * the method is only called once during first initialisation.
+     */
+    private MenuItem mTakeOff;
+    private MenuItem mRecordVideo;
 
     private final SensorManager mSensorManager;
     private final SensorEventListener mSensorListener = new SensorEventListener() {
@@ -177,6 +211,7 @@ public class GoogleGlass extends Controller {
         mGestureDetector.setScrollListener(new GestureDetector.ScrollListener() {
             @Override
             public boolean onScroll(float displacement, float delta, float velocity) {
+                Log.d(TAG, "onScroll: " + delta);
                 if (delta >= 0)
                     mDroneControl.setDroneGaz(1f);
                 else
@@ -231,7 +266,93 @@ public class GoogleGlass extends Controller {
         }
 
         mDroneControl.setMagntoEnabled(magnetoEnabled);
+        mDroneControl.addDroneStateListener(this);
+
+        //Register the broacast receiver.
+        mDroneControl.registerReceiver(mOnHeadStateListener,
+                new IntentFilter(Intents.ACTION_ON_HEAD_STATE_CHANGED));
         return true;
+    }
+
+    @Override
+    protected boolean onCreatePanelMenuImpl(MenuInflater inflater, int featureId, Menu menu){
+        inflater.inflate(R.menu.menu_controller_google_glass, menu);
+
+        switch(featureId){
+            case WindowUtils.FEATURE_VOICE_COMMANDS:
+                menu.setGroupEnabled(R.id.menu_group_voice, true);
+                menu.setGroupVisible(R.id.menu_group_voice, true);
+
+                menu.setGroupEnabled(R.id.menu_group_touch, false);
+                menu.setGroupVisible(R.id.menu_group_touch, false);
+                break;
+
+            default:
+                menu.setGroupEnabled(R.id.menu_group_voice, false);
+                menu.setGroupVisible(R.id.menu_group_voice, false);
+
+                menu.setGroupEnabled(R.id.menu_group_touch, true);
+                menu.setGroupVisible(R.id.menu_group_touch, true);
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
+    protected boolean onPreparePanelImpl(int featureId, View view, Menu menu){
+        final MenuItem takeoff = menu.findItem(R.id.menu_drone_takeoff);
+        if (takeoff != null) {
+            takeoff.setTitle(mDroneControl.isDroneFlying() ? R.string.LAND : R.string.TAKE_OFF);
+            if(featureId == WindowUtils.FEATURE_VOICE_COMMANDS){
+                mTakeOff = takeoff;
+            }
+        }
+
+        if(featureId == WindowUtils.FEATURE_VOICE_COMMANDS){
+            mRecordVideo = menu.findItem(R.id.menu_record_video);
+            if(mRecordVideo != null){
+                mRecordVideo.setTitle(mDroneControl.isRecording()
+                        ? R.string.stop_recording
+                        : R.string.record_video);
+            }
+        }
+        return true;
+    }
+
+    protected boolean onMenuItemSelectedImpl(int featureId, MenuItem item){
+        switch(item.getItemId()){
+            case R.id.menu_drone_takeoff:
+                mDroneControl.triggerDroneTakeOff();
+                return true;
+
+            case R.id.menu_flip_drone:
+                mDroneControl.doLeftFlip();
+                return true;
+
+            case R.id.menu_take_picture:
+                takePhoto();
+                return true;
+
+            case R.id.menu_record_video:
+                recordVideo();
+                return true;
+
+            case R.id.menu_switch_camera:
+                mDroneControl.switchDroneCamera();
+                return true;
+
+            case R.id.menu_settings:
+                mDroneControl.showSettingsFragment();
+                return true;
+
+            case R.id.menu_emergency:
+                mDroneControl.getDroneControlService().triggerEmergency();
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -253,8 +374,7 @@ public class GoogleGlass extends Controller {
     @Override
     protected boolean onKeyLongPressImpl(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_CAMERA) {
-            mDroneControl.onRecord();
-            mSoundPool.play(mVideoStartSound, 1f, 1f, 0, 0, 1);
+            recordVideo();
             return true;
         }
 
@@ -268,18 +388,32 @@ public class GoogleGlass extends Controller {
                     .FLAG_CANCELED_LONG_PRESS;
             if (!isLongPress) {
                 if(mDroneControl.isRecording()) {
-                    mDroneControl.onRecord();
-                    mSoundPool.play(mVideoStopSound, 1f, 1f, 0, 0, 1);
+                    recordVideo();
                 }
                 else {
-                    mSoundPool.play(mShutterSound, 1f, 1f, 0, 0, 1);
-                    mDroneControl.onTakePhoto();
+                    takePhoto();
                 }
             }
 
             return true;
         }
         return false;
+    }
+
+    public void takePhoto(){
+        mSoundPool.play(mShutterSound, 1f, 1f, 0, 0, 1);
+        mDroneControl.onTakePhoto();
+    }
+
+    public void recordVideo(){
+        final boolean isRecording = mDroneControl.isRecording();
+        mDroneControl.onRecord();
+        if(isRecording){
+            mSoundPool.play(mVideoStopSound, 1f, 1f, 0, 0, 1);
+        }
+        else{
+            mSoundPool.play(mVideoStartSound, 1f, 1f, 0, 0, 1);
+        }
     }
 
     @Override
@@ -327,6 +461,8 @@ public class GoogleGlass extends Controller {
 
     @Override
     protected void destroyImpl() {
+        mDroneControl.removeDroneStateListener(this);
+        mDroneControl.unregisterReceiver(mOnHeadStateListener);
         unregisterListeners();
         resetControls(true);
     }
@@ -352,4 +488,13 @@ public class GoogleGlass extends Controller {
         mSensorManager.unregisterListener(mSensorListener);
     }
 
+    @Override
+    public void onFlyingStateUpdate(boolean isFlying) {
+        mTakeOff.setTitle(isFlying ? R.string.LAND : R.string.TAKE_OFF);
+    }
+
+    @Override
+    public void onRecordingStateUpdate(boolean isRecording) {
+        mRecordVideo.setTitle(isRecording ? R.string.stop_recording : R.string.record_video);
+    }
 }

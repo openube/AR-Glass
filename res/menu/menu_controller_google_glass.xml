@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_drone_takeoff"
+        android:title="@string/TAKE_OFF"
+        android:icon="@drawable/ic_action_rocket"/>
+
+    <group android:id="@+id/menu_group_voice">
+        <item
+            android:id="@+id/menu_flip_drone"
+            android:title="@string/flip_drone"/>
+
+        <item
+            android:id="@+id/menu_take_picture"
+            android:title="@string/take_picture"/>
+        <item
+            android:id="@+id/menu_record_video"
+            android:title="@string/record_video"/>
+    </group>
+
+    <item
+        android:id="@+id/menu_switch_camera"
+        android:title="@string/switch_camera"
+        android:icon="@drawable/ic_sync_50"/>
+
+    <group android:id="@+id/menu_group_touch">
+        <item
+            android:id="@+id/menu_settings"
+            android:title="@string/ar_settings"
+            android:icon="@drawable/ic_gear_50"/>
+
+        <item
+            android:id="@+id/menu_emergency"
+            android:title="@string/EMERGENCY"
+            android:icon="@drawable/ic_warning_50"/>
+    </group>
+
+</menu>

@@ -39,14 +39,18 @@
     <string name="update_file_sent_successfully_please_restart_drone">Update file sent successfully\nPlease restart the AR.Drone</string>
     <string name="if_ardrone_led_green_reset_wifi_connection">If AR.Drone led is green, reset the Wi-Fi connection.</string>
     <!-- updater end -->
-    <string name="EMERGENCY">EMERGENCY</string>
+    <string name="EMERGENCY">Emergency</string>
     <string name="FLIP_only_ardrone_2">FLIP (only AR.Drone 2.0)</string>
     <string name="SHARE">SHARE</string>
     <string name="RECORD">RECORD</string>
     <string name="SWITCH">SWITCH</string>
-    <string name="switch_camera">SWITCH CAMERA</string>
+    <string name="flip_drone">Flip</string>
+    <string name="switch_camera">Switch camera</string>
+    <string name="take_picture">Take a picture</string>
+    <string name="record_video">Record a video</string>
+    <string name="stop_recording">Stop recording</string>
     <string name="ALTITUDE">ALTITUDE</string>
-    <string name="LAND">LAND</string>
+    <string name="LAND">Land</string>
     <string name="LANDING">LANDING</string>
     <string name="GEOLOCATION">GEOLOCATION</string>
     <string name="HOVERING">HOVERING</string>
@@ -61,7 +65,7 @@
     <string name="ACTIVATE_THE_FLIP_IN_THE_PARAMETERS">ACTIVATE THE FLIP SETTING AND DOUBLE TAP\nON THE SCREEN TO FLIP AS YOU FLY!</string>
     <string name="preferences">PREFERENCES</string>
     <string name="fly_record_share">Fly, Record, Share</string>
-    <string name="TAKE_OFF">TAKE OFF</string>
+    <string name="TAKE_OFF">Take Off</string>
     <string name="the_new_generation_of_ar_drone_has_arrived">The new generation of AR.Drone has arrived</string>
     <string name="ar_drone_update">AR.DRONE UPDATE</string>
     <string name="AR_DRONE_UPDATE">AR.DRONE UPDATE</string>
@@ -102,7 +106,7 @@
     <string name="Join_Our_Community">Join Our Community</string>
     <string name="Stay_Tuned">Stay Tuned</string>
     <!-- settings strings -->
-    <string name="ar_settings">SETTINGS</string>
+    <string name="ar_settings">Settings</string>
     <string name="PERSONAL_SETTINGS">PERSONAL SETTINGS</string>
     <string name="default_settings">DEFAULT SETTINGS</string>
     <string name="flat_trim">FLAT TRIM</string>

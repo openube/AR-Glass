@@ -5,17 +5,16 @@
 package com.ne0fhyklabs.freeflight.controllers;
 
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnGenericMotionListener;
 import android.view.View.OnTouchListener;
-import com.ne0fhyklabs.freeflight.activities.ControlDroneActivity;
-import com.ne0fhyklabs.freeflight.sensors.DeviceOrientationManager;
-import com.ne0fhyklabs.freeflight.ui.HudViewController;
-import com.ne0fhyklabs.freeflight.ui.hud.Sprite;
 
-// TODO: check if possible to move HudView sprites into a subclass of this
-// That subclass would be parent to the controller that are enabled in touch mode.
+import com.ne0fhyklabs.freeflight.activities.ControlDroneActivity;
+
 public abstract class Controller implements KeyEvent.Callback, OnGenericMotionListener,
         OnTouchListener {
 
@@ -50,58 +49,106 @@ public abstract class Controller implements KeyEvent.Callback, OnGenericMotionLi
         mDroneControl = droneControl;
     }
 
-    public boolean init() {
-        checkIfAlive();
-        boolean initStatus = initImpl();
-
-        return initStatus;
+    private void checkIfAlive() {
+        if (mWasDestroyed) {
+            throw new IllegalStateException("Can't reuse controller after it has been destroyed.");
+        }
     }
 
-    protected abstract boolean initImpl();
-
-    public boolean isActive(){
+    public final boolean isActive() {
         return mIsActive;
     }
 
+    public final boolean init() {
+        checkIfAlive();
+        return initImpl();
+    }
+
+    public final void resume() {
+        checkIfAlive();
+        resumeImpl();
+        mIsActive = true;
+    }
+
+    public final void pause() {
+        checkIfAlive();
+        pauseImpl();
+        mIsActive = false;
+    }
+
+    public final void destroy() {
+        checkIfAlive();
+
+        destroyImpl();
+        mWasDestroyed = true;
+        mIsActive = false;
+    }
+
+    public final boolean onCreatePanelMenu(MenuInflater inflater, int featureId, Menu menu) {
+        return onCreatePanelMenuImpl(inflater, featureId, menu);
+    }
+
+    public final boolean onPreparePanel(int featureId, View view, Menu menu){
+        return onPreparePanelImpl(featureId, view, menu);
+    }
+
+    public final boolean onMenuItemSelected(int featureId, MenuItem item){
+        return onMenuItemSelectedImpl(featureId, item);
+    }
+
     @Override
-    public boolean onGenericMotion(View view, MotionEvent event) {
+    public final boolean onGenericMotion(View view, MotionEvent event) {
         checkIfAlive();
         return mIsActive && onGenericMotionImpl(view, event);
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public final boolean onKeyDown(int keyCode, KeyEvent event) {
         checkIfAlive();
         return mIsActive && onKeyDownImpl(keyCode, event);
     }
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
+    public final boolean onKeyUp(int keyCode, KeyEvent event) {
         checkIfAlive();
         return mIsActive && onKeyUpImpl(keyCode, event);
     }
 
     @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+    public final boolean onKeyLongPress(int keyCode, KeyEvent event) {
         checkIfAlive();
         return mIsActive && onKeyLongPressImpl(keyCode, event);
     }
 
     @Override
-    public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
+    public final boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
         checkIfAlive();
         return false;
     }
 
     @Override
-    public boolean onTouch(View view, MotionEvent event) {
+    public final boolean onTouch(View view, MotionEvent event) {
         checkIfAlive();
         return mIsActive && onTouchImpl(view, event);
     }
 
+    protected abstract boolean initImpl();
+
+    protected boolean onCreatePanelMenuImpl(MenuInflater inflater, int featureId, Menu menu) {
+        return false;
+    }
+
+    protected boolean onPreparePanelImpl(int featureId, View view, Menu menu){
+        return false;
+    }
+
+    protected boolean onMenuItemSelectedImpl(int featureId, MenuItem item){
+        return false;
+    }
+
     protected abstract boolean onKeyDownImpl(int keyCode, KeyEvent event);
 
-    protected boolean onKeyLongPressImpl(int keyCode, KeyEvent event){
+    protected boolean onKeyLongPressImpl(int keyCode, KeyEvent event) {
         return false;
     }
 
@@ -111,34 +158,9 @@ public abstract class Controller implements KeyEvent.Callback, OnGenericMotionLi
 
     protected abstract boolean onTouchImpl(View view, MotionEvent event);
 
-    public void resume() {
-        checkIfAlive();
-        resumeImpl();
-        mIsActive = true;
-    }
-
     protected abstract void resumeImpl();
-
-    public void pause() {
-        checkIfAlive();
-        pauseImpl();
-        mIsActive = false;
-    }
 
     protected abstract void pauseImpl();
 
-    public void destroy() {
-        checkIfAlive();
-
-        destroyImpl();
-        mWasDestroyed = true;
-        mIsActive = false;
-    }
-
     protected abstract void destroyImpl();
-
-    protected void checkIfAlive() {
-        if (mWasDestroyed)
-            throw new IllegalStateException("Can't reuse controller after it has been destroyed.");
-    }
 }
