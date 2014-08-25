@@ -1,1 +1,1 @@
-include ':AndroHud'
+include ':libraries:AndroHud'
