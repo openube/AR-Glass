@@ -29,8 +29,7 @@ import com.ne0fhyklabs.freeflight.fragments.GlassPreferenceFragment
 /**
  * Created by fhuya on 5/9/14.
  */
-class GlassSliderPreference(val context: Context, attrs: AttributeSet)
-: Preference(context, attrs) {
+class GlassSliderPreference(val appContext: Context, attrs: AttributeSet): Preference(appContext, attrs) {
 
     class object {
         private val TAG = javaClass<GlassSliderPreference>().getSimpleName()

@@ -121,7 +121,7 @@ public class HudViewProxy(private val activity: ControlDroneActivity) {
             val imgNum = Math.min(3, Math.max(0, Math.round(percent / 100.0f * 3.0f)))
             mHudBatteryInfo.setText("$percent%")
             val compoundDrawables = mHudBatteryInfo.getCompoundDrawables()
-            if(compoundDrawables != null && compoundDrawables[0] != null){
+            if(compoundDrawables != null){
                 compoundDrawables[0].setLevel(imgNum)
             }
         }

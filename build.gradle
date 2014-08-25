@@ -2,7 +2,7 @@ import groovy.swing.SwingBuilder
 import com.android.builder.core.DefaultManifestParser
 
 buildscript {
-    ext.kotlin_version = '0.1-SNAPSHOT'
+    ext.kotlin_version = '0.8.11'
     repositories {
         mavenCentral()
         maven {
@@ -11,12 +11,12 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 repositories {
@@ -27,10 +27,9 @@ repositories {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:+'
-//    compile fileTree(dir: 'libs', include: '*.jar')
+    compile 'com.android.support:support-v4:19.1.0'
     compile project(':AndroHud')
-    compile project(':GlassProgressBar')
+    compile files('libs/gdk.jar')
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
@@ -65,6 +64,7 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+/*
     signingConfigs {
         release {
             storeFile file(System.getenv("ANDROID_KEYSTORE"))
@@ -73,7 +73,7 @@ android {
             keyPassword ""
         }
     }
-
+*/
     productFlavors {
 //        arm {
 //            ndk {
@@ -82,6 +82,7 @@ android {
 //        }
     }
 
+/*
     buildTypes {
         release {
             signingConfig signingConfigs.release
@@ -93,6 +94,7 @@ android {
             }
         }
     }
+    */
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
